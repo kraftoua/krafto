@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Перегляд товару | KRAFTO</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        background-color: #050505;
+        color: #fff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+      }
+
+      /* Контейнер сторінки */
+      .product-page {
+        padding: 40px 20px;
+        max-width: 1100px;
+        margin: 0 auto;
+        min-height: 80vh;
+      }
+
+      .product-container {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 50px;
+        background: #0a0a0a;
+        padding: 30px;
+        border-radius: 15px;
+        border: 1px solid #1a1a1a;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      }
+
+      /* Галерея */
+      .main-img-container {
+        position: relative;
+        cursor: zoom-in;
+        border-radius: 12px;
+        background: #000;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1 / 1;
+        border: 1px solid #222;
+      }
+
+      #product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+      }
+      .main-img-container:hover #product-img {
+        transform: scale(1.03);
+      }
+
+      /* Стрілки на головному фото */
+      .nav-arrows {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        display: none;
+        justify-content: space-between;
+        transform: translateY(-50%);
+        pointer-events: none;
+        padding: 0 15px;
+        box-sizing: border-box;
+        z-index: 10;
+      }
+      .main-img-container:hover .nav-arrows {
+        display: flex;
+      }
+
+      .nav-arrows span {
+        background: rgba(0, 0, 0, 0.8);
+        color: #ffcc00;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 18px;
+        pointer-events: auto;
+        border-radius: 50%;
+        transition: 0.3s;
+        border: 1px solid #333;
+      }
+      .nav-arrows span:hover {
+        background: #ffcc00;
+        color: #000;
+        border-color: #ffcc00;
+      }
+
+      /* Мініатюри */
+      .thumbnails {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+      .thumb {
+        width: 75px;
+        height: 75px;
+        object-fit: cover;
+        cursor: pointer;
+        border: 2px solid transparent;
+        opacity: 0.4;
+        border-radius: 8px;
+        transition: 0.3s;
+        flex-shrink: 0;
+      }
+      .thumb.active {
+        border-color: #ffcc00;
+        opacity: 1;
+      }
+
+      /* Деталі товару */
+      #product-name {
+        font-size: 36px;
+        margin: 0 0 10px 0;
+        color: #fff;
+        font-weight: 600;
+      }
+      .price {
+        font-size: 32px;
+        color: #ffcc00;
+        font-weight: bold;
+        margin-bottom: 30px;
+        display: block;
+      }
+
+      .description-box {
+        border-top: 1px solid #222;
+        padding-top: 25px;
+        margin-top: 10px;
+      }
+      .description-box h3 {
+        color: #666;
+        font-size: 13px;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+        letter-spacing: 2px;
+      }
+      #product-desc {
+        color: #ccc;
+        line-height: 1.8;
+        font-size: 16px;
+        white-space: pre-wrap;
+      }
+
+      /* Повноекранний режим (Lightbox) */
+      .fullscreen-viewer {
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.98);
+        justify-content: center;
+        align-items: center;
+      }
+      #full-img {
+        max-width: 95%;
+        max-height: 92vh;
+        object-fit: contain;
+      }
+      .close-viewer {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: #fff;
+        font-size: 50px;
+        cursor: pointer;
+        transition: 0.3s;
+        z-index: 10001;
+      }
+      .close-viewer:hover {
+        color: #ffcc00;
+      }
+
+      .full-nav span {
+        position: absolute;
+        top: 50%;
+        color: #fff;
+        font-size: 60px;
+        cursor: pointer;
+        padding: 20px;
+        transform: translateY(-50%);
+        user-select: none;
+        transition: 0.3s;
+        z-index: 10002;
+      }
+      #full-prev {
+        left: 10px;
+      }
+      #full-next {
+        right: 10px;
+      }
+      .full-nav span:hover {
+        color: #ffcc00;
+      }
+
+      /* Кнопка назад */
+      .back-btn {
+        text-decoration: none;
+        color: #888;
+        font-size: 14px;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .back-btn:hover {
+        color: #ffcc00;
+      }
+
+      @media (max-width: 850px) {
+        .product-container {
+          grid-template-columns: 1fr;
+          gap: 30px;
+          padding: 20px;
+        }
+        #product-name {
+          font-size: 28px;
+        }
+        .full-nav span {
+          font-size: 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header style="padding: 20px 0; border-bottom: 1px solid #111">
+      <div
+        style="
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 0 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        "
+      >
+        <a href="index.html" class="back-btn">← Повернутися до вибору</a>
+        <img
+          src="img/logo.jpg"
+          alt="Logo"
+          style="height: 45px; border-radius: 8px"
+        />
+      </div>
+    </header>
+
+    <main class="product-page">
+      <div class="product-container">
+        <div class="gallery-section">
+          <div class="main-img-container" id="main-img-click">
+            <img id="product-img" src="" alt="Завантаження..." />
+            <div class="nav-arrows" id="nav-arrows">
+              <span id="prev-img">❮</span>
+              <span id="next-img">❯</span>
+            </div>
+          </div>
+          <div class="thumbnails" id="thumb-container"></div>
+        </div>
+
+        <div class="product-details">
+          <h1 id="product-name">Завантаження назви...</h1>
+          <span id="product-price" class="price"></span>
+          <div class="description-box">
+            <h3>Детальний опис</h3>
+            <p id="product-desc">Завантаження опису товару...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="fullscreen-overlay" class="fullscreen-viewer">
+      <span class="close-viewer">&times;</span>
+      <div class="full-nav" id="full-nav-btns">
+        <span id="full-prev">❮</span>
+        <span id="full-next">❯</span>
+      </div>
+      <img id="full-img" src="" />
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyA2vUVszawPHKhURHBrOg2OCRiAJfYokLg",
+        authDomain: "krafto-f0be7.firebaseapp.com",
+        projectId: "krafto-f0be7",
+        storageBucket: "krafto-f0be7.appspot.com",
+        messagingSenderId: "646333185483",
+        appId: "1:646333185483:web:0bf51d6db7c61507d1ca4e",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get("id");
+      let images = [];
+      let currentIndex = 0;
+
+      async function loadProduct() {
+        if (!productId) {
+          window.location.href = "index.html";
+          return;
+        }
+        try {
+          const docSnap = await getDoc(doc(db, "products", productId));
+          if (docSnap.exists()) {
+            const p = docSnap.data();
+
+            // Обробляємо посилання на фото (одне або кілька через кому)
+            images = p.image.includes(",")
+              ? p.image.split(",").map((s) => s.trim())
+              : [p.image];
+
+            document.getElementById("product-name").innerText = p.name;
+            document.getElementById("product-price").innerText =
+              p.price + " грн/100г";
+            document.getElementById("product-desc").innerText =
+              p.description ||
+              "Для цього товару поки що немає детального опису.";
+
+            updateGallery();
+          } else {
+            document.getElementById("product-name").innerText =
+              "Товар не знайдено";
+          }
+        } catch (e) {
+          console.error("Помилка завантаження:", e);
+        }
+      }
+
+      function updateGallery() {
+        const mainImg = document.getElementById("product-img");
+        mainImg.src = images[currentIndex];
+
+        const multi = images.length > 1;
+        document.getElementById("nav-arrows").style.display = multi
+          ? "flex"
+          : "none";
+        document.getElementById("full-nav-btns").style.display = multi
+          ? "block"
+          : "none";
+
+        const thumbContainer = document.getElementById("thumb-container");
+        thumbContainer.innerHTML = multi
+          ? images
+              .map(
+                (img, i) =>
+                  `<img src="${img}" class="thumb ${i === currentIndex ? "active" : ""}" onclick="window.setImg(${i})">`,
+              )
+              .join("")
+          : "";
+      }
+
+      window.setImg = (i) => {
+        currentIndex = i;
+        updateGallery();
+      };
+
+      const nextSlide = () => {
+        currentIndex = (currentIndex + 1) % images.length;
+        updateGallery();
+        if (
+          document.getElementById("fullscreen-overlay").style.display === "flex"
+        ) {
+          document.getElementById("full-img").src = images[currentIndex];
+        }
+      };
+      const prevSlide = () => {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        updateGallery();
+        if (
+          document.getElementById("fullscreen-overlay").style.display === "flex"
+        ) {
+          document.getElementById("full-img").src = images[currentIndex];
+        }
+      };
+
+      document.getElementById("next-img").onclick = (e) => {
+        e.stopPropagation();
+        nextSlide();
+      };
+      document.getElementById("prev-img").onclick = (e) => {
+        e.stopPropagation();
+        prevSlide();
+      };
+      document.getElementById("full-next").onclick = (e) => {
+        e.stopPropagation();
+        nextSlide();
+      };
+      document.getElementById("full-prev").onclick = (e) => {
+        e.stopPropagation();
+        prevSlide();
+      };
+
+      // Логіка повноекранного режиму
+      const overlay = document.getElementById("fullscreen-overlay");
+      document.getElementById("main-img-click").onclick = () => {
+        document.getElementById("full-img").src = images[currentIndex];
+        overlay.style.display = "flex";
+        document.body.style.overflow = "hidden"; // Забороняємо скрол
+      };
+
+      const closeOverlay = () => {
+        overlay.style.display = "none";
+        document.body.style.overflow = "auto"; // Повертаємо скрол
+      };
+
+      document.querySelector(".close-viewer").onclick = closeOverlay;
+      overlay.onclick = (e) => {
+        if (e.target === overlay) closeOverlay();
+      };
+
+      loadProduct();
+    </script>
+  </body>
+</html>

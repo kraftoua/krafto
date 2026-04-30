@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Адмін-панель | KRAFTO</title>
+    <link rel="stylesheet" href="style.css" />
+    <script>
+      // Перевірка пароля
+      (function () {
+        const correctPassword = "04012011";
+        if (sessionStorage.getItem("adminAuth") !== "true") {
+          let password = prompt("Введіть пароль адміністратора:");
+          if (password === correctPassword) {
+            sessionStorage.setItem("adminAuth", "true");
+          } else {
+            alert("Невірний пароль!");
+            window.location.href = "index.html";
+          }
+        }
+      })();
+    </script>
+    <style>
+      .admin-wrapper {
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+      }
+      .admin-card {
+        background: #0a0a0a;
+        border: 1px solid #1a1a1a;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+      }
+      .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid #222;
+        padding-bottom: 15px;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+      .stat-box {
+        background: #111;
+        padding: 15px;
+        border-radius: 4px;
+        text-align: center;
+        border: 1px solid #222;
+      }
+      .stat-box h4 {
+        margin: 0;
+        color: #666;
+        font-size: 10px;
+        text-transform: uppercase;
+      }
+      .stat-box p {
+        margin: 5px 0 0;
+        font-size: 20px;
+        color: #ffcc00;
+        font-weight: bold;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+      label {
+        display: block;
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        background: #151515;
+        border: 1px solid #333;
+        color: #fff;
+        border-radius: 4px;
+        outline: none;
+        box-sizing: border-box;
+        font-family: inherit;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+      .btn-add {
+        background: #ffcc00;
+        color: #000;
+        border: none;
+        padding: 15px;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.3s;
+      }
+      .btn-add:disabled {
+        background: #555;
+        cursor: not-allowed;
+      }
+      .product-list {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      .product-list th,
+      .product-list td {
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #222;
+        font-size: 14px;
+      }
+      .list-img {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+      .btn-delete {
+        background: #ff4444;
+        color: #fff;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .desc-cell {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-wrapper">
+      <div class="admin-header">
+        <h1>Панель керування</h1>
+        <a href="index.html" style="color: #666; text-decoration: none"
+          >← На сайт</a
+        >
+      </div>
+
+      <div class="stats-grid" id="stats-container"></div>
+
+      <div class="admin-card">
+        <h3>Додати новий товар</h3>
+        <form id="productForm" class="form-grid">
+          <div class="form-group">
+            <label>Назва</label>
+            <input type="text" id="name" required />
+          </div>
+          <div class="form-group">
+            <label>Категорія</label>
+            <select id="category">
+              <option value="syrokopcheni">СИРОКОПЧЕНІ</option>
+              <option value="syrovyaleni">СИРОВ'ЯЛЕНІ</option>
+              <option value="kopcheni">КОПЧЕНІ КОВБАСИ</option>
+              <option value="kopchenosti">КОПЧЕНОСТІ</option>
+              <option value="bbq">BBQ ПРОДУКЦІЯ</option>
+              <option value="pechena">ПЕЧЕНА ПРОДУКЦІЯ</option>
+              <option value="ryba">РИБА ХОЛОДНОГО КОПЧЕННЯ</option>
+              <option value="tushonka">ТУШОНКА</option>
+              <option value="present">ПОДАРУНКОВІ БОКСИ</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Ціна (грн/100г)</label>
+            <input type="number" id="price" required />
+          </div>
+          <div class="form-group">
+            <input
+              type="text"
+              id="imageUrl"
+              placeholder="посилання1.jpg, посилання2.jpg, посилання3.jpg"
+              required
+            />
+            <small style="color: #666"
+              >Можна вставити кілька посилань через кому</small
+            >
+          </div>
+          <div class="form-group full-width">
+            <label>Опис товару (буде видно на сторінці товару)</label>
+            <textarea
+              id="description"
+              placeholder="Розкажіть про склад, смак або особливості..."
+            ></textarea>
+          </div>
+          <div class="full-width">
+            <button type="submit" class="btn-add" id="submitBtn">
+              Опублікувати товар
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <h3>Список товарів у хмарі</h3>
+        <table class="product-list">
+          <thead>
+            <tr>
+              <th>Фото</th>
+              <th>Назва</th>
+              <th>Опис</th>
+              <th>Ціна</th>
+              <th>Дія</th>
+            </tr>
+          </thead>
+          <tbody id="products-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+        deleteDoc,
+        doc,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyA2vUVszawPHKhURHBrOg2OCRiAJfYokLg",
+        authDomain: "krafto-f0be7.firebaseapp.com",
+        projectId: "krafto-f0be7",
+        storageBucket: "krafto-f0be7.appspot.com",
+        messagingSenderId: "646333185483",
+        appId: "1:646333185483:web:0bf51d6db7c61507d1ca4e",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const catNames = {
+        syrokopcheni: "СИРОКОПЧЕНІ",
+        syrovyaleni: "СИРОВ'ЯЛЕНІ",
+        kopcheni: "КОПЧЕНІ",
+        kopchenosti: "КОПЧЕНОСТІ",
+        bbq: "BBQ",
+        pechena: "ПЕЧЕНА",
+        ryba: "РИБА",
+        tushonka: "ТУШОНКА",
+      };
+
+      async function refreshData() {
+        try {
+          const querySnapshot = await getDocs(collection(db, "products"));
+          const tableBody = document.getElementById("products-table-body");
+          const statsContainer = document.getElementById("stats-container");
+          let products = [];
+
+          tableBody.innerHTML = "";
+          querySnapshot.forEach((docSnap) => {
+            const p = docSnap.data();
+            products.push({ ...p, id: docSnap.id });
+            tableBody.innerHTML += `
+                <tr>
+                    <td><img src="${p.image}" class="list-img" onerror="this.src='https://via.placeholder.com/50'"></td>
+                    <td>${p.name}</td>
+                    <td class="desc-cell">${p.description || "-"}</td>
+                    <td>${p.price} грн</td>
+                    <td><button class="btn-delete" data-id="${docSnap.id}">Видалити</button></td>
+                </tr>`;
+          });
+
+          statsContainer.innerHTML = `<div class="stat-box" style="border-color:#ffcc00"><h4>Всього</h4><p>${products.length}</p></div>`;
+          Object.keys(catNames).forEach((cat) => {
+            const count = products.filter((p) => p.category === cat).length;
+            statsContainer.innerHTML += `<div class="stat-box"><h4>${catNames[cat]}</h4><p>${count}</p></div>`;
+          });
+
+          document.querySelectorAll(".btn-delete").forEach((btn) => {
+            btn.onclick = async () => {
+              if (confirm("Видалити цей товар?")) {
+                await deleteDoc(doc(db, "products", btn.dataset.id));
+                refreshData();
+              }
+            };
+          });
+        } catch (err) {
+          console.error("Помилка:", err);
+        }
+      }
+
+      document.getElementById("productForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = true;
+        btn.innerText = "Збереження...";
+
+        try {
+          await addDoc(collection(db, "products"), {
+            name: document.getElementById("name").value,
+            category: document.getElementById("category").value,
+            price: document.getElementById("price").value,
+            image: document.getElementById("imageUrl").value,
+            description: document.getElementById("description").value, // Зберігаємо опис
+          });
+
+          e.target.reset();
+          await refreshData();
+          alert("Товар додано!");
+        } catch (error) {
+          console.error(error);
+          alert("Помилка при збереженні.");
+        } finally {
+          btn.disabled = false;
+          btn.innerText = "Опублікувати товар";
+        }
+      };
+
+      refreshData();
+    </script>
+  </body>
+</html>
