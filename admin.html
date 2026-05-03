@@ -172,10 +172,8 @@
           <div class="form-group">
             <label>Категорія</label>
             <select id="category">
-              <option value="syrokopcheni">СИРОКОПЧЕНІ</option>
-              <option value="syrovyaleni">СИРОВ'ЯЛЕНІ</option>
-              <option value="kopcheni">КОПЧЕНІ КОВБАСИ</option>
-              <option value="kopchenosti">КОПЧЕНОСТІ</option>
+              <option value="syrokopcheni">>СИРОКОПЧЕНА,СИРОВ'ЯЛЕНА ПРОДУКЦІЯ</option>
+              <option value="kopcheni">КОПЧЕНІ КОВБАСИ І КОПЧЕНОСТІ</option>
               <option value="bbq">BBQ ПРОДУКЦІЯ</option>
               <option value="pechena">ПЕЧЕНА ПРОДУКЦІЯ</option>
               <option value="ryba">РИБА ХОЛОДНОГО КОПЧЕННЯ</option>
@@ -254,14 +252,13 @@
       const db = getFirestore(app);
 
       const catNames = {
-        syrokopcheni: "СИРОКОПЧЕНІ",
-        syrovyaleni: "СИРОВ'ЯЛЕНІ",
-        kopcheni: "КОПЧЕНІ",
-        kopchenosti: "КОПЧЕНОСТІ",
+        syrokopcheni: "СИРОКОПЧЕНА,СИРОВ'ЯЛЕНА ПРОДУКЦІЯ",
+        kopcheni: "КОПЧЕНІ КОВБАСИ ІКОПЧЕНОСТІ",
         bbq: "BBQ",
         pechena: "ПЕЧЕНА",
         ryba: "РИБА",
         tushonka: "ТУШОНКА",
+        present: "ПОДАРУНКОВІ БОКСИ",
       };
 
       async function refreshData() {
